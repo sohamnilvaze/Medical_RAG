@@ -5,23 +5,25 @@ from query_handling import answer_with_content, prepare_content, prepare_llm
 folder_path = "E:\COEP ACADEMICS\Nitin Sir Colab Work\Demo RAG\Notes"
 
 print("Reading all text files")
-all_contents = read_all_txt_files(folder_path, 2)
+all_contents, ids = read_all_txt_files(folder_path, 2)
 
 print("Initiating the models")
 embedding_model = prepare_model()
-generator = prepare_llm()
 
 print("Preparing Faiss vector database")
-faiss_index, content_df = prepare_vector_database(embedding_model,all_contents)
+faiss_index, content_df, metadata = prepare_vector_database(embedding_model,all_contents,ids)
 
 def process_query(query:str):
     if not query.strip():
         return "Please enter a query"
 
     required_content, score = prepare_content(query,faiss_index,content_df,embedding_model)
-    answer, score = answer_with_content(query,faiss_index,content_df,generator,embedding_model)
+    print(required_content)
+    print(score)
+    answer, score = answer_with_content(query,faiss_index,content_df,embedding_model)
 
     return answer, f"Confidence Score: {score}"
+
 
 with gr.Blocks() as demo:
     gr.Markdown("Medical RAG system")
@@ -41,4 +43,4 @@ with gr.Blocks() as demo:
 
 
 if __name__ == "__main__":
-    demo.launch()
+    demo.launch(debug = True)
